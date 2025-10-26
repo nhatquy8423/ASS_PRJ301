@@ -100,27 +100,28 @@ public class AdminController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Lấy "username" thay vì "email"
-        String user = request.getParameter("username");
+        // Thay đổi: Lấy "email" thay vì "username"
+        String email = request.getParameter("email");
         String pass = request.getParameter("password");
 
-        // Kiểm tra trong DB (Giữ nguyên)
+        // Kiểm tra trong DB (Giả định AdminDAO.getAdmin được cập nhật để nhận email)
         AdminDAO adminDAO = new AdminDAO();
-        Admin admin = adminDAO.getAdmin(user, pass);
+        // Thay đổi: Truyền email thay vì username
+        Admin admin = adminDAO.getAdmin(email, pass);
 
         // Xử lý kết quả
         if (admin != null) {
             // Đăng nhập thành công
-            HttpSession session = request.getSession(true); // Tạo session mới
+            HttpSession session = request.getSession(true);
             session.setAttribute("admin", admin);
 
-            // Chuyển đến trang dashboard (thông qua doGet của /admin)
+            // Chuyển đến trang dashboard 
             response.sendRedirect(request.getContextPath() + "/admin");
         } else {
             // Đăng nhập thất bại
-            request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
+            request.setAttribute("error", "Email hoặc mật khẩu không đúng!");
 
-            // **Điều chỉnh:** Báo lại cho login.jsp biết đây là login Admin
+            // Báo lại cho login.jsp biết đây là login Admin
             request.setAttribute("loginTarget", "admin");
             request.setAttribute("loginTitle", "Admin Login");
             request.getRequestDispatcher("login.jsp").forward(request, response);
