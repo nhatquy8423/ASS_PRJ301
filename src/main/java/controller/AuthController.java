@@ -17,41 +17,14 @@ import jakarta.servlet.http.HttpSession;
 import model.Customer;
 
 /**
- *
- * @author Admin
+ * Servlet xử lý việc đăng nhập/đăng ký cho Customer.
+ * URL: /auth
  */
 @WebServlet(name = "AuthController", urlPatterns = {"/auth"})
 public class AuthController extends HttpServlet {
 
     /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet AuthController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet AuthController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
+     * Xử lý HTTP GET: Hiển thị trang đăng nhập (login.jsp)
      *
      * @param request servlet request
      * @param response servlet response
@@ -61,11 +34,37 @@ public class AuthController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        
+        // (Giữ nguyên logic xử lý cookie để tự động điền form nếu có)
+        String savedEmail = "";
+        String savedPassword = "";
+        boolean rememberChecked = false;
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if (c.getName().equals("userEmail")) {
+                    savedEmail = c.getValue();
+                }
+                if (c.getName().equals("userPassword")) {
+                    savedPassword = c.getValue();
+                    if (!savedPassword.isEmpty()) {
+                        rememberChecked = true;
+                    }
+                }
+            }
+        }
+        
+        request.setAttribute("savedEmail", savedEmail);
+        request.setAttribute("savedPassword", savedPassword);
+        request.setAttribute("rememberChecked", rememberChecked);
+        
+        // Chuyển tiếp sang login.jsp
+        request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
     /**
-     * Handles the HTTP <code>POST</code> method.
+     * Xử lý HTTP POST: Xác thực đăng nhập Customer.
      *
      * @param request servlet request
      * @param response servlet response
@@ -77,34 +76,32 @@ public class AuthController extends HttpServlet {
             throws ServletException, IOException {
 
         CustomerDAO cusDAO = new CustomerDAO();
+        HttpServletRequest req = request;
 
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String remember = request.getParameter("remember");
+        String email = req.getParameter("email");
+        String password = req.getParameter("password");
+        String remember = req.getParameter("remember");
 
+        // 1. Xác thực Customer
         Customer c = cusDAO.getCustomer(email, password);
 
         if (c == null) {
-            // Xóa cookie nếu login sai
-            Cookie emailCookie = new Cookie("userEmail", "");
-            Cookie passwordCookie = new Cookie("userPassword", "");
-            emailCookie.setMaxAge(0);
-            passwordCookie.setMaxAge(0);
-            emailCookie.setPath("/");
-            passwordCookie.setPath("/");
-            response.addCookie(emailCookie);
-            response.addCookie(passwordCookie);
-
-            request.setAttribute("errorMessage", "Sai email hoặc mật khẩu");
+            // Đăng nhập thất bại
+            
+            // (Giữ lại thông tin đã nhập để điền lại vào form)
+            request.setAttribute("savedEmail", email);
+            
+            // Đặt thông báo lỗi
+            request.setAttribute("errorMessage", "Sai email hoặc mật khẩu!");
             request.getRequestDispatcher("login.jsp").forward(request, response);
 
         } else {
-            // ✅ Tạo session để server biết tài khoản nào đang login
-            HttpSession session = request.getSession();
-            session.setAttribute("customer", c); // lưu toàn bộ object Customer
-            session.setMaxInactiveInterval(30 * 60); // 30 phút
+            // ✅ 2. ĐĂNG NHẬP THÀNH CÔNG
+            HttpSession session = req.getSession();
+            session.setAttribute("customer", c); // Lưu đối tượng Customer vào session
+            session.setMaxInactiveInterval(30 * 60); // Thời gian sống session
 
-            // Cookie nhớ tài khoản/password
+            // 3. Xử lý Cookie Remember Me (giữ nguyên logic đã có)
             if ("on".equals(remember)) {
                 Cookie emailCookie = new Cookie("userEmail", email);
                 Cookie passwordCookie = new Cookie("userPassword", password);
@@ -115,7 +112,6 @@ public class AuthController extends HttpServlet {
                 response.addCookie(emailCookie);
                 response.addCookie(passwordCookie);
             } else {
-                // Nếu không tick remember, vẫn lưu email nhưng xóa password
                 Cookie emailCookie = new Cookie("userEmail", email);
                 Cookie passwordCookie = new Cookie("userPassword", "");
                 emailCookie.setMaxAge(7 * 24 * 60 * 60);
@@ -126,7 +122,17 @@ public class AuthController extends HttpServlet {
                 response.addCookie(passwordCookie);
             }
 
-            response.sendRedirect("home.jsp");
+            // 4. LOGIC CHUYỂN HƯỚNG TỚI targetURL (MỚI)
+            String targetURL = (String) session.getAttribute("targetURL");
+
+            if (targetURL != null && !targetURL.isEmpty()) {
+                // Nếu có targetURL (bị Filter chặn trước đó), chuyển hướng tới trang đích
+                session.removeAttribute("targetURL"); 
+                response.sendRedirect(req.getContextPath() + targetURL);
+            } else {
+                // Nếu không có targetURL (người dùng tự vào /auth), chuyển hướng về home.jsp
+                response.sendRedirect("home.jsp"); 
+            }
         }
     }
 
@@ -137,7 +143,6 @@ public class AuthController extends HttpServlet {
      */
     @Override
     public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+        return "Handles Customer Authentication (Login/Register)";
+    }
 }

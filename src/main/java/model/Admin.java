@@ -10,16 +10,19 @@ package model;
  */
 public class Admin {
     private int admin_id;
-    private String admin_name, username, password;
+    // Bổ sung email vào trường khai báo
+    private String admin_name, username, password, email; 
 
     public Admin() {
     }
 
-    public Admin(int admin_id, String admin_name, String username, String password) {
+    // Cập nhật Constructor
+    public Admin(int admin_id, String admin_name, String username, String password, String email) {
         this.admin_id = admin_id;
         this.admin_name = admin_name;
         this.username = username;
         this.password = password;
+        this.email = email; // Thêm email
     }
 
     public int getAdmin_id() {
@@ -53,10 +56,19 @@ public class Admin {
     public void setPassword(String password) {
         this.password = password;
     }
+    
+    // Bổ sung Getter và Setter cho email
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     @Override
     public String toString() {
-        return "Admin{" + "admin_id=" + admin_id + ", admin_name=" + admin_name + ", username=" + username + ", password=" + password + '}';
+        return "Admin{" + "admin_id=" + admin_id + ", admin_name=" + admin_name + ", username=" + username + ", password=" + password + ", email=" + email + '}';
     }
     
 }
