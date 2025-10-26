@@ -12,6 +12,7 @@ public class Product {
     private int pro_id;
     Category cat_id;
     private String pro_name, brand, des, image_url;
+    private double min_price;
     
     public Product(){
         
@@ -24,6 +25,14 @@ public class Product {
         this.brand = brand;
         this.des = des;
         this.image_url = image_url;
+        this.min_price = min_price;
+    }
+    public double getMin_price() {
+        return min_price;
+    }
+
+    public void setMin_price(double min_price) {
+        this.min_price = min_price;
     }
 
     public int getPro_id() {
@@ -76,7 +85,9 @@ public class Product {
 
     @Override
     public String toString() {
-        return "Product{" + "pro_id=" + pro_id + ", cat_id=" + cat_id + ", pro_name=" + pro_name + ", brand=" + brand + ", des=" + des + ", image_url=" + image_url + '}';
+        return "Product{" + "pro_id=" + pro_id + ", cat_id=" + cat_id + ", pro_name=" + pro_name + ", brand=" + brand + ", des=" + des + ", image_url=" + image_url + ", min_price=" + min_price + '}';
     }
+
+    
     
 }

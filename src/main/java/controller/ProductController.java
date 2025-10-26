@@ -18,7 +18,7 @@ import model.Category;
 import model.Product;
 
 /**
- * Controller xử lý hiển thị danh sách sản phẩm, lọc theo danh mục và tìm kiếm.
+ * Controller xử lý hiển thị danh sách sản phẩm, lọc theo danh mục, tìm kiếm, lọc giá và SẮP XẾP.
  */
 @WebServlet(name = "ProductController", urlPatterns = {"/product"})
 public class ProductController extends HttpServlet {
@@ -29,16 +29,22 @@ public class ProductController extends HttpServlet {
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         // Đặt UTF-8 cho request để xử lý tiếng Việt cho tìm kiếm
         request.setCharacterEncoding("UTF-8");
-        
+
         ProductDAO productDAO = new ProductDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
+
+        // 1. Lấy tham số sắp xếp (Nếu không có, mặc định là 'default')
+        String sortOrder = request.getParameter("sort");
+        if (sortOrder == null || sortOrder.isEmpty()) {
+            sortOrder = "default";
+        }
+        request.setAttribute("sort", sortOrder); // Gửi lại giá trị sắp xếp cho JSP
 
         // Luôn lấy danh sách danh mục để hiển thị sidebar
         List<Category> listCategories = categoryDAO.getAllCategories();
@@ -50,38 +56,61 @@ public class ProductController extends HttpServlet {
         if (action != null) {
             switch (action) {
                 case "filter":
-                    // Xử lý lọc theo category
+                    // Xử lý lọc theo category VÀ SẮP XẾP
                     String catId_raw = request.getParameter("cat_id");
                     try {
                         int cat_id = Integer.parseInt(catId_raw);
-                        listProducts = productDAO.getProductsByCategoryId(cat_id);
+                        // Kêu gọi DAO với tham số sắp xếp
+                        listProducts = productDAO.getProductsByCategoryId(cat_id, sortOrder);
                         // Đánh dấu category đang active
-                        request.setAttribute("active_cat_id", cat_id); 
+                        request.setAttribute("active_cat_id", cat_id);
                     } catch (NumberFormatException e) {
                         // Nếu cat_id không hợp lệ, tải tất cả sản phẩm
-                        listProducts = productDAO.getAllProducts();
+                        listProducts = productDAO.getAllProducts(sortOrder);
                     }
                     break;
                 case "search":
-                    // Xử lý tìm kiếm
+                    // Xử lý tìm kiếm VÀ SẮP XẾP
                     String keyword = request.getParameter("keyword");
                     // Kiểm tra null và trim
                     if (keyword == null || keyword.trim().isEmpty()) {
-                        listProducts = productDAO.getAllProducts();
+                        listProducts = productDAO.getAllProducts(sortOrder);
                     } else {
-                        listProducts = productDAO.searchProductsByName(keyword.trim());
+                        // Kêu gọi DAO với tham số sắp xếp
+                        listProducts = productDAO.searchProductsByName(keyword.trim(), sortOrder);
                         // Gửi lại keyword về view để hiển thị trong ô search
-                        request.setAttribute("keyword", keyword); 
+                        request.setAttribute("keyword", keyword);
+                    }
+                    break;
+                case "price_filter":
+                    // Xử lý LỌC THEO KHOẢNG GIÁ VÀ SẮP XẾP
+                    String minPrice_raw = request.getParameter("min_price");
+                    String maxPrice_raw = request.getParameter("max_price");
+
+                    try {
+                        double minPrice = Double.parseDouble(minPrice_raw);
+                        double maxPrice = Double.parseDouble(maxPrice_raw);
+
+                        // Kêu gọi DAO với tham số sắp xếp
+                        listProducts = productDAO.getProductsByPriceRange(minPrice, maxPrice, sortOrder);
+
+                        // Truyền lại giá trị đã lọc
+                        request.setAttribute("min_price", minPrice);
+                        request.setAttribute("max_price", maxPrice);
+
+                    } catch (NumberFormatException e) {
+                        listProducts = productDAO.getAllProducts(sortOrder);
+                        request.getSession().setAttribute("errorMsg", "Giá trị lọc không hợp lệ.");
                     }
                     break;
                 default:
-                    // Mặc định (nếu action không hợp lệ)
-                    listProducts = productDAO.getAllProducts();
+                    // Mặc định (nếu action không hợp lệ) VÀ SẮP XẾP
+                    listProducts = productDAO.getAllProducts(sortOrder);
                     break;
             }
         } else {
-            // Mặc định (nếu không có action)
-            listProducts = productDAO.getAllProducts();
+            // Mặc định (nếu không có action) VÀ SẮP XẾP
+            listProducts = productDAO.getAllProducts(sortOrder);
         }
 
         // Gửi danh sách sản phẩm (đã lọc hoặc tìm kiếm) sang view
@@ -94,7 +123,7 @@ public class ProductController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Hầu hết các trang sản phẩm chỉ dùng GET
+        // Chuyển POST sang GET
         doGet(request, response);
     }
 
