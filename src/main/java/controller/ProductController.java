@@ -39,7 +39,7 @@ public class ProductController extends HttpServlet {
         ProductDAO productDAO = new ProductDAO();
         CategoryDAO categoryDAO = new CategoryDAO();
 
-        // 1. Lấy tham số sắp xếp (Nếu không có, mặc định là 'default')
+        // Lấy tham số sắp xếp (Nếu không có, mặc định là 'default')
         String sortOrder = request.getParameter("sort");
         if (sortOrder == null || sortOrder.isEmpty()) {
             sortOrder = "default";

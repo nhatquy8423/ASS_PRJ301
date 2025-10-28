@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
-        /* CSS tùy chỉnh (Đảm bảo các class này khớp với file CSS của bạn) */
         .breadcrumb-section {
             padding: 50px 0;
             background-size: cover;
@@ -73,7 +72,7 @@
             border: 1px solid #ccc;
         }
         .product-hover-icons a:hover {
-            background-color: #7fad39; /* Màu xanh lá Ogani */
+            background-color: #7fad39;
             color: #fff;
         }
     </style>
@@ -187,7 +186,6 @@
                                 <div class="product-item shadow-sm">
                                     <div class="position-relative">
                                         
-                                        <%-- ĐÃ FIX: CHỈ SỬ DỤNG CONTEXT PATH + GIÁ TRỊ DB --%>
                                         <img src="${pageContext.request.contextPath}/${p.image_url}" 
                                              class="card-img-top product-card-img" alt="${p.pro_name}">
                                         
@@ -245,15 +243,15 @@
             const sortValue = this.value;
             const currentUrl = new URL(window.location.href);
             
-            // 1. Xóa tham số sắp xếp cũ (nếu có)
+            // Xóa tham số sắp xếp cũ (nếu có)
             currentUrl.searchParams.delete('sort');
             
-            // 2. Thêm tham số sắp xếp mới (nếu không phải là mặc định)
+            // Thêm tham số sắp xếp mới (nếu không phải là mặc định)
             if (sortValue !== 'default') {
                 currentUrl.searchParams.set('sort', sortValue);
             }
             
-            // 3. Chuyển hướng để tải lại trang với các tham số mới (giữ lại lọc, tìm kiếm, v.v.)
+            // Chuyển hướng để tải lại trang với các tham số mới (giữ lại lọc, tìm kiếm, v.v.)
             window.location.href = currentUrl.toString();
         });
     </script>
