@@ -14,6 +14,7 @@ public class Admin {
     private String admin_name, username, password, email; 
 
     public Admin() {
+        this.admin_id = -1;
     }
 
     // Cập nhật Constructor

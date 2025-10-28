@@ -17,22 +17,18 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.annotation.WebFilter; // Import
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
-@WebServlet(name = "AdminAuthFilter", urlPatterns = {"/adminfilter"})
-
 /**
- * Filter này chặn tất cả các yêu cầu đến các trang JSP trong thư mục /admin/
- * nếu người dùng chưa đăng nhập (chưa có session "admin").
- *
- * * @WebFilter("/admin/*") sẽ áp dụng filter này cho mọi URL có dạng
- * /TenProject/admin/dashboard.jsp, /TenProject/admin/manage-products.jsp, v.v.
+ * Filter này CHỈ chặn các yêu cầu đến các trang NỘI BỘ của admin
+ * (KHÔNG BAO GỒM trang đăng nhập /admin)
  */
-@WebFilter("/admin/*")
+// SỬA Ở ĐÂY: Thay "/admin/*" bằng URL cụ thể cần bảo vệ
+@WebFilter(urlPatterns = {"/admin/order"}) 
 public class AdminAuthFilter implements Filter {
 
     @Override
@@ -41,13 +37,12 @@ public class AdminAuthFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
-        HttpSession session = req.getSession(false); // Lấy session (không tạo mới)
+        HttpSession session = req.getSession(false); 
 
-        // Kiểm tra xem session có tồn tại VÀ có attribute "admin" không
         boolean isLoggedIn = (session != null && session.getAttribute("admin") != null);
 
         if (isLoggedIn) {
-            // Nếu đã đăng nhập, cho phép đi tiếp (truy cập vào trang admin)
+            // Nếu đã đăng nhập, cho phép đi tiếp (vào /admin/order)
             chain.doFilter(request, response);
         } else {
             // Nếu CHƯA đăng nhập, chuyển hướng về trang đăng nhập Admin
