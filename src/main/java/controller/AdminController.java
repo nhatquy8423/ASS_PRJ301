@@ -5,6 +5,8 @@
 package controller;
 
 import DAO.AdminDAO;
+import DAO.OrderDAO;
+import DAO.ProductDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,37 +20,53 @@ import model.Admin;
 public class AdminController extends HttpServlet {
 
     /**
-     * SỬA LỖI QUAN TRỌNG NHẤT NẰM Ở ĐÂY
-     * * Phải set "loginTarget" = "admin" để login.jsp
-     * biết cần POST form về /admin
+     * SỬA LỖI QUAN TRỌNG NHẤT NẰM Ở ĐÂY * Phải set "loginTarget" = "admin" để
+     * login.jsp biết cần POST form về /admin
      */
+    // Trong file: AdminController.java
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
         HttpSession session = request.getSession(false); 
+        Admin admin = (session != null) ? (Admin) session.getAttribute("admin") : null;
         String action = request.getParameter("action");
-
-        // Xử lý LOGOUT
+        
+        // 1. Xử lý LOGOUT
         if (action != null && action.equals("logout")) {
             if (session != null) {
-                session.invalidate();
+                session.invalidate(); // Xóa session
             }
-            response.sendRedirect(request.getContextPath() + "/admin");
+            response.sendRedirect(request.getContextPath() + "/admin"); // Quay lại trang đăng nhập
             return;
         }
 
-        // Kiểm tra đã đăng nhập chưa
-        if (session != null && session.getAttribute("admin") != null) {
-            // Nếu đã đăng nhập, chuyển đến trang quản lý (ví dụ: /admin/order)
-            response.sendRedirect(request.getContextPath() + "/admin/order");
-        } else {
-            // Nếu CHƯA đăng nhập, hiển thị form login
+        // 2. Xử lý HIỂN THỊ TRANG
+        if (admin != null) {
+            // Đã đăng nhập: LẤY DỮ LIỆU VÀ CHUYỂN ĐẾN DASHBOARD
             
-            // **BẮT BUỘC PHẢI CÓ DÒNG NÀY**
+            // Khởi tạo DAO
+            OrderDAO orderDAO = new OrderDAO();
+            ProductDAO productDAO = new ProductDAO();
+            
+            // Gọi các hàm thống kê
+            double totalRevenue = orderDAO.getTotalRevenue();
+            int newOrderCount = orderDAO.getOrderCountByStatus("Pending"); // "Pending" là đơn hàng mới
+            int totalProducts = productDAO.getTotalProductCount();
+            
+            // Đặt thuộc tính (attributes) để gửi sang JSP
+            request.setAttribute("totalRevenue", totalRevenue);
+            request.setAttribute("newOrderCount", newOrderCount);
+            request.setAttribute("totalProducts", totalProducts);
+            
+            // Forward đến trang dashboard.jsp
+            request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
+            
+        } else {
+            // Chưa đăng nhập: Hiển thị form đăng nhập (login.jsp)
             request.setAttribute("loginTarget", "admin");
             request.setAttribute("loginTitle", "Admin Login");
-
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
     }
@@ -66,8 +84,8 @@ public class AdminController extends HttpServlet {
 
         AdminDAO adminDAO = new AdminDAO();
         Admin admin = adminDAO.login(email, pass);
-        
-        if (admin != null && admin.getAdmin_id() > 0) { 
+
+        if (admin != null && admin.getAdmin_id() > 0) {
             // Đăng nhập thành công
             HttpSession session = request.getSession(true);
             session.setAttribute("admin", admin); // Lưu ĐỐI TƯỢNG admin

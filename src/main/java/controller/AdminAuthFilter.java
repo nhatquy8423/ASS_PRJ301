@@ -28,7 +28,7 @@ import java.io.IOException;
  * (KHÔNG BAO GỒM trang đăng nhập /admin)
  */
 // SỬA Ở ĐÂY: Thay "/admin/*" bằng URL cụ thể cần bảo vệ
-@WebFilter(urlPatterns = {"/admin/order"}) 
+@WebFilter(urlPatterns = {"/admin/order,/admin/product"}) 
 public class AdminAuthFilter implements Filter {
 
     @Override

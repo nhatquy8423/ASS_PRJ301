@@ -238,4 +238,23 @@ public class ProductDAO extends DBContext {
             e.printStackTrace();
         }
     }
+    
+   
+
+    /**NhậtQuy_Admin
+     * [Admin Dashboard] Đếm tổng số sản phẩm có trong CSDL.
+     */
+    public int getTotalProductCount() {
+        String sql = "SELECT COUNT(pro_id) AS ProductCount FROM Product";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("ProductCount");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
