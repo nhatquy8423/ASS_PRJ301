@@ -17,6 +17,8 @@
     <title>Cửa hàng nước hoa</title>
     
     <link href="${pageContext.request.contextPath}/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
@@ -80,7 +82,8 @@
 
 <body>
     <%-- <jsp:include page="header.jsp" /> --%>
-    
+    <jsp:include page="header.jsp"/>
+    <jsp:include page="navbar.jsp"/> 
     <section class="breadcrumb-section" 
              style="background-image: url('${pageContext.request.contextPath}/img/breadcrumb.jpg');">
         <div class="container">
@@ -235,6 +238,7 @@
         </div>
     </section>
     <%-- <jsp:include page="footer.jsp" /> --%>
+      <jsp:include page="footer.jsp"/>
 
     <script src="${pageContext.request.contextPath}/bootstrap.bundle.min.js" type="text/javascript"></script>
 
@@ -255,5 +259,6 @@
             window.location.href = currentUrl.toString();
         });
     </script>
+      
 </body>
 </html>
