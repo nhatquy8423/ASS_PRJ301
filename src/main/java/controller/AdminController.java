@@ -67,7 +67,7 @@ public class AdminController extends HttpServlet {
             // Chưa đăng nhập: Hiển thị form đăng nhập (login.jsp)
             request.setAttribute("loginTarget", "admin");
             request.setAttribute("loginTitle", "Admin Login");
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("loginAdmin.jsp").forward(request, response);
         }
     }
 
@@ -93,10 +93,8 @@ public class AdminController extends HttpServlet {
         } else {
             // Đăng nhập thất bại
             request.setAttribute("error", "Email hoặc mật khẩu không đúng!");
-            request.setAttribute("loginTarget", "admin");
-            request.setAttribute("loginTitle", "Admin Login");
             request.setAttribute("savedEmail", email);
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            request.getRequestDispatcher("loginAdmin.jsp").forward(request, response);
         }
     }
 

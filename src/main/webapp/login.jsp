@@ -37,7 +37,6 @@
                 height: 100vh;
             }
 
-            /* Phần form bên trái */
             .left-panel {
                 width: 50%;
                 display: flex;
@@ -114,11 +113,9 @@
                 background-color: #a00000;
             }
 
-            /* Phần ảnh bên phải */
             .right-panel {
                 width: 50%;
                 background-color: #f8f8f8;
-                /* Cập nhật đường dẫn ảnh của bạn tại đây */
                 background-image: url('img/background_login.jpg'); 
                 background-size: cover;
                 background-position: center;
@@ -142,17 +139,12 @@
             <div class="left-panel">
                 <div class="login-form">
                     
-                    <%-- ---------------------------------------------------- --%>
-                    <%--               1. LOGIC XỬ LÝ COOKIE & ATTRIBUTES     --%>
-                    <%-- ---------------------------------------------------- --%>
                     <%
-                        // Lấy các attribute được set từ Controller (dùng khi login thất bại)
                         String savedEmail = (String) request.getAttribute("savedEmail");
                         String savedPassword = (String) request.getAttribute("savedPassword");
                         Boolean rememberCheckedObj = (Boolean) request.getAttribute("rememberChecked");
                         boolean rememberChecked = (rememberCheckedObj != null && rememberCheckedObj);
                         
-                        // Nếu không có attribute (login lần đầu), kiểm tra cookie
                         if (savedEmail == null) {
                             savedEmail = "";
                             savedPassword = "";
@@ -174,38 +166,11 @@
                         }
                     %>
                     
-                    <%-- ---------------------------------------------------- --%>
-                    <%--             2. HIỂN THỊ TIÊU ĐỀ ĐỘNG (DÙNG JSTL)     --%>
-                    <%-- ---------------------------------------------------- --%>
-                    <h2>
-                    <c:choose>
-                        <%-- Nếu AdminController set loginTarget là 'admin' --%>
-                        <c:when test="${loginTarget == 'admin'}">
-                            Đăng nhập Quản trị viên
-                        </c:when>
-                        <%-- Mặc định là Customer Login --%>
-                        <c:otherwise>
-                            Đăng nhập
-                        </c:otherwise>
-                    </c:choose>
-                    </h2>
+                    <h2>Đăng nhập</h2>
                     <p>Đăng nhập để truy cập vào website của chúng tôi</p>
 
-                    <%-- ---------------------------------------------------- --%>
-                    <%--              3. ĐIỀU CHỈNH FORM ACTION (DÙNG JSTL)   --%>
-                    <%-- ---------------------------------------------------- --%>
-                    <form action="<c:choose>
-                                    <%-- Nếu AdminController set loginTarget là 'admin', POST về /admin --%>
-                                    <c:when test='${loginTarget == "admin"}'>
-                                        admin
-                                    </c:when>
-                                    <%-- Mặc định, POST về /auth (AuthController) --%>
-                                    <c:otherwise>
-                                        auth
-                                    </c:otherwise>
-                                  </c:choose>" method="POST"> 
+                    <form action="auth" method="POST"> 
                         
-                        <%-- Input name="email" và name="password" được giữ nguyên cho cả 2 luồng --%>
                         <input type="email" class="form-control" name="email" placeholder="Email" value="<%= savedEmail%>" required>
                         <input type="password" class="form-control" name="password" placeholder="Password" value="<%= savedPassword%>" required>
 
@@ -223,20 +188,16 @@
                             <span>Bạn chưa có tài khoản? </span>
                             <a href="register" style="color:#d00000; font-weight:600;">Đăng ký</a>
                         </div>
+                        
+                        <div class="text-center mt-4" style="font-size: 14px;">
+                            <a href="admin" style="color:#555;">Đăng nhập với tư cách Quản trị viên</a>
+                        </div>
                     </form>
 
-                    <%-- ---------------------------------------------------- --%>
-                    <%--         4. HIỂN THỊ THÔNG BÁO LỖI (DÙNG JSTL)        --%>
-                    <%-- ---------------------------------------------------- --%>
-                    <%-- errorMessage: Lỗi từ AuthController (Customer) --%>
                     <c:if test="${not empty errorMessage}">
-                        <p class="alert alert-danger" role="alert">${errorMessage}</p>
+                        <p class="alert alert-danger" role="alert" style="margin-top: 15px;">${errorMessage}</p>
                     </c:if>
                     
-                    <%-- error: Lỗi từ AdminController (Admin) --%>
-                    <c:if test="${not empty error}">
-                        <p class="alert alert-danger" role="alert">${error}</p>
-                    </c:if>
                 </div>
             </div>
 
