@@ -40,11 +40,13 @@ public class ProductVariantDAO extends DBContext {
         );
 
         // 3. Tạo đối tượng ProductVariant, sử dụng đối tượng Product ở trên
+        // (Đã cập nhật theo code của bạn)
         return new ProductVariant(
                 rs.getInt("variant_id"),
                 product,
                 rs.getString("volume"),
-                rs.getDouble("price") // Model của bạn dùng double
+                rs.getDouble("price"), // Model của bạn dùng double
+                rs.getInt("quantity")  // <-- ĐÃ THÊM TỒN KHO
         );
     }
 
@@ -56,6 +58,7 @@ public class ProductVariantDAO extends DBContext {
      */
     public List<ProductVariant> getVariantsByProductId(int pro_id) {
         List<ProductVariant> list = new ArrayList<>();
+        // Câu SQL "pv.*" đã bao gồm cột "quantity"
         String sql = "SELECT pv.*, p.*, c.cat_name, c.cat_des " +
                      "FROM ProductVariant pv " +
                      "LEFT JOIN Product p ON pv.pro_id = p.pro_id " +
@@ -81,6 +84,7 @@ public class ProductVariantDAO extends DBContext {
      * @return Đối tượng ProductVariant hoàn chỉnh hoặc null nếu không tìm thấy.
      */
     public ProductVariant getVariantById(int variant_id) {
+        // Câu SQL "pv.*" đã bao gồm cột "quantity"
         String sql = "SELECT pv.*, p.*, c.cat_name, c.cat_des " +
                      "FROM ProductVariant pv " +
                      "LEFT JOIN Product p ON pv.pro_id = p.pro_id " +

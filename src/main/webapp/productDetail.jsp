@@ -144,52 +144,83 @@
                             </div>
                         </div>
 
-                        <div class="col-lg-6 col-md-6">
-                            <div class="product__details__text">
-                                <h3>${product.pro_name}</h3>
-                                <p class="text-muted">${product.brand}</p>
+                    </div>
+                    
+                    <div class="col-lg-6 col-md-6">
+                        <div class="product__details__text">
+                            <h3>${product.pro_name}</h3>
+                            <p class="text-muted">${product.brand}</p>
+                            
+                            <form action="${pageContext.request.contextPath}/productdetail" method="post">
+                                <input type="hidden" name="action" value="add">
+                                
+                                <c:choose>
+                                    <c:when test="${not empty requestScope.variants}" >
+                                        
+                                        <div class="product__details__price">
+                                            <span id="displayPrice">
+                                                <fmt:formatNumber value="${requestScope.variants[0].price}" type="number" maxFractionDigits="0"/> VNĐ
+                                            </span>
+                                        </div>
 
-                                <form action="${pageContext.request.contextPath}/productdetail" method="post">
-                                    <input type="hidden" name="action" value="add">
+                                        <div class="mb-3">
+                                            <label for="variantSelect" class="form-label"><b>Chọn Dung tích:</b></label>
+                                            
+                                            <select name="variant_id" id="variantSelect" class="form-select">
+                                                <c:forEach var="v" items="${requestScope.variants}">
+                                                    
+                                                    <option value="${v.variant_id}" 
+                                                            data-price="${v.price}" 
+                                                            data-stock="${v.quantity}">
+                                                        
+                                                        ${v.volume} - 
+                                                        <fmt:formatNumber value="${v.price}" type="number" maxFractionDigits="0"/> VNĐ
+                                                        (Tồn kho: ${v.quantity}) </option>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
 
-                                    <c:choose>
-                                        <c:when test="${not empty requestScope.variants}"   >
-
-                                            <div class="product__details__price">
-                                                <span id="displayPrice">
-                                                    <fmt:formatNumber value="${requestScope.variants[0].price}" type="number" maxFractionDigits="0"/> VNĐ
-                                                </span>
+                                        <div class="product__details__quantity mb-3">
+                                            <label for="quantityInput" class="form-label"><b>Số lượng:</b></label>
+                                            <div class="input-group" style="width: 150px;">
+                                                
+                                                <input type="number" id="quantityInput" name="quantity" class="form-control" value="1" min="1" max="" required>
                                             </div>
-
-                                            <div class="mb-3">
-                                                <label for="variantSelect" class="form-label"><b>Chọn Dung tích:</b></label>
-                                                <select name="variantId" id="variantSelect" class="form-select">
-                                                    <c:forEach var="v" items="${requestScope.variants}">
-                                                        <option value="${v.variant_id}" data-price="${v.price}">
-                                                            ${v.volume} - 
-                                                            <fmt:formatNumber value="${v.price}" type="number" maxFractionDigits="0"/> VNĐ
-                                                        </option>
-                                                    </c:forEach>
-                                                </select>
-                                            </div>
-
-                                            <div class="product__details__quantity mb-3">
-                                                <label for="quantityInput" class="form-label"><b>Số lượng:</b></label>
-                                                <div class="input-group" style="width: 150px;">
-                                                    <input type="number" id="quantityInput" name="quantity" class="form-control" value="1" min="1" required>
-                                                </div>
-                                            </div>
-
-                                            <button type="submit" class="btn primary-btn mt-3">
-                                                <i class="fa fa-shopping-bag"></i> THÊM VÀO GIỎ
-                                            </button>
-                                            <a href="#" class="heart-icon"><i class="fa fa-heart"></i></a>
-                                            </c:when>
-                                            <c:otherwise>
-                                            <div class="product__details__price text-danger">Hết hàng hoặc chưa có biến thể</div>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </form>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn primary-btn mt-3">
+                                            <i class="fa fa-shopping-bag"></i> THÊM VÀO GIỎ
+                                        </button>
+                                        
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="product__details__price text-danger">Hết hàng hoặc chưa có biến thể</div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </form>
+                            
+                        </div>
+                    </div>
+                    
+                    <%-- MÔ TẢ SẢN PHẨM --%>
+                    <div class="col-lg-12 mt-5">
+                        <div class="product__details__tab">
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#tabs-1" role="tab">Mô tả</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#tabs-2" role="tab">Thông tin</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content border border-top-0 p-3 bg-white">
+                                <div class="tab-pane active" id="tabs-1" role="tabpanel">
+                                    <p>${product.des}</p>
+                                </div>
+                                <div class="tab-pane" id="tabs-2" role="tabpanel">
+                                    <p>Thương hiệu: <b>${product.brand}</b></p>
+                                    <p>Danh mục: <b>${product.cat_id.cat_name}</b></p>
+                                </div>
 
                             </div>
                         </div>
@@ -260,6 +291,7 @@
                     Sản phẩm không tồn tại hoặc đã bị xóa.
                 </div>
             </div>
+
         </c:if>
         <h3 style="margin-bottom:25px;margin-left: 40px;font-weight:bold">Đánh giá và hỏi đáp về sản phẩm</h3>
         <jsp:include page="commentForm.jsp"/>
@@ -276,6 +308,7 @@
                 <strong><%= c.getFull_name()%>:</strong>
                 <p><%= c.getContent()%></p>
                 <small><%= c.getCreated_at()%></small>
+
             </div>
             <%
                 }
@@ -284,26 +317,48 @@
 
         <%-- <jsp:include page="footer.jsp" /> --%>
 
-        <script src="${pageContext.request.contextPath}/bootstrap.bundle.min.js"></script>
-        <script>
-            // JavaScript để cập nhật giá khi chọn biến thể
-            document.addEventListener('DOMContentLoaded', function () {
-                const variantSelect = document.getElementById('variantSelect');
-                const displayPrice = document.getElementById('displayPrice');
 
-                if (variantSelect) {
-                    // Đảm bảo logic này khớp với logic trong Controller nếu bạn có JS phức tạp hơn
-                    variantSelect.addEventListener('change', function () {
-                        const selectedOption = this.options[this.selectedIndex];
-                        const price = selectedOption.getAttribute('data-price');
+    <script src="${pageContext.request.contextPath}/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // JavaScript để cập nhật giá VÀ giới hạn tồn kho
+        document.addEventListener('DOMContentLoaded', function() {
+            const variantSelect = document.getElementById('variantSelect');
+            const displayPrice = document.getElementById('displayPrice');
+            const quantityInput = document.getElementById('quantityInput'); // Lấy ô số lượng
 
-                        // Định dạng giá tiền 
-                        const formattedPrice = parseFloat(price).toLocaleString('vi-VN', {maximumFractionDigits: 0}) + ' VNĐ';
+            // 1. Định nghĩa hàm cập nhật giá VÀ tồn kho
+            function updatePriceAndStock() {
+                if (!variantSelect) return; 
+                
+                const selectedOption = variantSelect.options[variantSelect.selectedIndex];
+                
+                // --- A. Cập nhật giá (Như code cũ của bạn) ---
+                const price = selectedOption.getAttribute('data-price');
+                const formattedPrice = parseFloat(price).toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' VNĐ';
+                displayPrice.textContent = formattedPrice;
 
-                        displayPrice.textContent = formattedPrice;
-                    });
+                // --- B. Cập nhật giới hạn tồn kho (max) ---
+                if(quantityInput) {
+                    const stock = selectedOption.getAttribute('data-stock');
+                    quantityInput.max = stock; // Gán 'max' cho ô số lượng
+
+                    // (Tùy chọn) Nếu số lượng đang nhập > tồn kho, tự động giảm về max
+                    if (parseInt(quantityInput.value) > parseInt(stock)) {
+                        quantityInput.value = stock;
+                    }
                 }
-            });
-        </script>
-    </body>
+            }
+
+            // 2. Gán sự kiện 'change' cho <select>
+            if (variantSelect) {
+                variantSelect.addEventListener('change', updatePriceAndStock);
+            }
+
+            // 3. Chạy hàm 1 lần khi tải trang để gán giá trị ban đầu
+            updatePriceAndStock();
+        });
+    </script>
+</body>
+
 </html>
