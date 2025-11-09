@@ -13,15 +13,17 @@ public class ProductVariant {
     Product pro_id;
     private String volume; // dung tích
     private double price;
+    private int quantity;
 
     public ProductVariant() {
     }
 
-    public ProductVariant(int variant_id, Product pro_id, String volume, double price) {
+    public ProductVariant(int variant_id, Product pro_id, String volume, double price, int quantity) {
         this.variant_id = variant_id;
         this.pro_id = pro_id;
         this.volume = volume;
         this.price = price;
+        this.quantity = quantity;
     }
 
     public int getVariant_id() {
@@ -56,9 +58,17 @@ public class ProductVariant {
         this.price = price;
     }
 
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
     @Override
     public String toString() {
-        return "ProductVariant{" + "variant_id=" + variant_id + ", pro_id=" + pro_id + ", volume=" + volume + ", price=" + price + '}';
+        return "ProductVariant{" + "variant_id=" + variant_id + ", pro_id=" + pro_id + ", volume=" + volume + ", price=" + price + ", quantity=" + quantity + '}';
     }
-    
+
 }
