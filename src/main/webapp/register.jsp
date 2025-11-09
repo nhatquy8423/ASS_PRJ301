@@ -124,10 +124,10 @@
                         </c:if>
 
                         <!-- Password -->
-                        <input type="password" class="form-control" name="password" placeholder="Mật khẩu" required>
+                        <input type="password" pattern="(?=.*[^a-zA-Z0-0]).{6,}" title="Mật khẩu phải có ít nhất 6 kí tự và 1 kí tự đặc biệt" class="form-control" name="password" placeholder="Mật khẩu" required>
 
                         <!-- Confirm Password -->
-                        <input type="password" class="form-control" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
+                        <input type="password" pattern="(?=.*[^a-zA-Z0-0]).{6,}" title="Mật khẩu phải có ít nhất 6 kí tự và 1 kí tự đặc biệt" class="form-control" name="confirmPassword" placeholder="Xác nhận mật khẩu" required>
                         <c:if test="${not empty errorConfirmPassword}">
                             <small style="color: red;font-size:17px">${errorConfirmPassword}</small>
                         </c:if>

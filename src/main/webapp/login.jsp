@@ -8,7 +8,7 @@
         <title>Login Form</title>
         <link href="bootstrap.min.css" rel="stylesheet" type="text/css"/>
         <style>
-            
+
             .container {
                 display: flex;
                 width: 100%;
@@ -119,21 +119,25 @@
                 width: 50%;
                 background-color: #f8f8f8;
                 /* Cập nhật đường dẫn ảnh của bạn tại đây */
-                background-image: url('img/background_login.jpg'); 
+                background-image: url('img/background_login.jpg');
                 background-size: cover;
                 background-position: center;
             }
 
-            .alert {
-                padding: 10px;
-                margin-bottom: 15px;
-                border-radius: 5px;
+            /* Chỉ tự custom cảnh báo lỗi */
+            .alert-danger {
                 color: #721c24;
                 background-color: #f8d7da;
                 border: 1px solid #f5c6cb;
-                font-size: 14px;
-                text-align: center;
             }
+
+            /* Thêm style xanh lá cho success (nếu muốn custom) */
+            .alert-success {
+                color: #155724;
+                background-color: #d4edda;
+                border: 1px solid #c3e6cb;
+            }
+
         </style>
     </head>
     <body>
@@ -141,7 +145,7 @@
         <div class="container">
             <div class="left-panel">
                 <div class="login-form">
-                    
+
                     <%-- ---------------------------------------------------- --%>
                     <%--               1. LOGIC XỬ LÝ COOKIE & ATTRIBUTES     --%>
                     <%-- ---------------------------------------------------- --%>
@@ -151,43 +155,41 @@
                         String savedPassword = (String) request.getAttribute("savedPassword");
                         Boolean rememberCheckedObj = (Boolean) request.getAttribute("rememberChecked");
                         boolean rememberChecked = (rememberCheckedObj != null && rememberCheckedObj);
-                        
+
                         // Nếu không có attribute (login lần đầu), kiểm tra cookie
                         if (savedEmail == null) {
                             savedEmail = "";
                             savedPassword = "";
-                            
+
                             Cookie[] cookies = request.getCookies();
                             if (cookies != null) {
                                 for (Cookie c : cookies) {
                                     if (c.getName().equals("userEmail")) {
                                         savedEmail = c.getValue();
                                     }
-                                    if (c.getName().equals("userPassword")) {
-                                        savedPassword = c.getValue();
-                                    }
+                                    
                                 }
                             }
-                            if (!savedPassword.isEmpty()) {
+                            if (!savedEmail.isEmpty()) {
                                 rememberChecked = true;
                             }
                         }
                     %>
-                    
+
                     <%-- ---------------------------------------------------- --%>
                     <%--             2. HIỂN THỊ TIÊU ĐỀ ĐỘNG (DÙNG JSTL)     --%>
                     <%-- ---------------------------------------------------- --%>
                     <h2>
-                    <c:choose>
-                        <%-- Nếu AdminController set loginTarget là 'admin' --%>
-                        <c:when test="${loginTarget == 'admin'}">
-                            Đăng nhập Quản trị viên
-                        </c:when>
-                        <%-- Mặc định là Customer Login --%>
-                        <c:otherwise>
-                            Đăng nhập
-                        </c:otherwise>
-                    </c:choose>
+                        <c:choose>
+                            <%-- Nếu AdminController set loginTarget là 'admin' --%>
+                            <c:when test="${loginTarget == 'admin'}">
+                                Đăng nhập Quản trị viên
+                            </c:when>
+                            <%-- Mặc định là Customer Login --%>
+                            <c:otherwise>
+                                Đăng nhập
+                            </c:otherwise>
+                        </c:choose>
                     </h2>
                     <p>Đăng nhập để truy cập vào website của chúng tôi</p>
 
@@ -195,27 +197,28 @@
                     <%--              3. ĐIỀU CHỈNH FORM ACTION (DÙNG JSTL)   --%>
                     <%-- ---------------------------------------------------- --%>
                     <form action="<c:choose>
-                                    <%-- Nếu AdminController set loginTarget là 'admin', POST về /admin --%>
-                                    <c:when test='${loginTarget == "admin"}'>
-                                        admin
-                                    </c:when>
-                                    <%-- Mặc định, POST về /auth (AuthController) --%>
-                                    <c:otherwise>
-                                        auth
-                                    </c:otherwise>
-                                  </c:choose>" method="POST"> 
-                        
+                              <%-- Nếu AdminController set loginTarget là 'admin', POST về /admin --%>
+                              <c:when test='${loginTarget == "admin"}'>
+                                  admin
+                              </c:when>
+                              <%-- Mặc định, POST về /auth (AuthController) --%>
+                              <c:otherwise>
+                                  auth
+                              </c:otherwise>
+                          </c:choose>" method="POST"> 
+
                         <%-- Input name="email" và name="password" được giữ nguyên cho cả 2 luồng --%>
                         <input type="email" class="form-control" name="email" placeholder="Email" value="<%= savedEmail%>" required>
-                        <input type="password" class="form-control" name="password" placeholder="Password" value="<%= savedPassword%>" required>
+                        <input type="password"  pattern="(?=.*[^a-zA-Z0-0]).{6,}" title="Mật khẩu phải có ít nhất 6 kí tự và 1 kí tự đặc biệt" class="form-control" name="password" placeholder="Password"  required>
 
                         <div class="remember-section">
                             <div>
                                 <input type="checkbox" id="remember" name="remember" <%= rememberChecked ? "checked" : ""%>>
                                 <label for="remember">Ghi nhớ tài khoản</label>
                             </div>
-                            <a href="#" style="color:#d00000;">Quên mật khẩu</a>
+                            <a href="request-reset" style="color:#d00000;">Quên mật khẩu</a>
                         </div>
+
 
                         <button type="submit" class="btn-login">Đăng nhập</button>
 
@@ -225,19 +228,30 @@
                         </div>
                     </form>
 
+
                     <%-- ---------------------------------------------------- --%>
                     <%--         4. HIỂN THỊ THÔNG BÁO LỖI (DÙNG JSTL)        --%>
                     <%-- ---------------------------------------------------- --%>
                     <%-- errorMessage: Lỗi từ AuthController (Customer) --%>
+                    <c:if test="${not empty successRegister}">
+                        <p class="alert alert-success" role="alert">${successRegister}</p><!-- comment -->
+                    </c:if>
+
+                    <c:if test="${not empty logoutSuccess}">
+                        <p class="alert alert-success" role="alert">${logoutSuccess}</p><!-- comment -->
+                    </c:if>
+
                     <c:if test="${not empty errorMessage}">
                         <p class="alert alert-danger" role="alert">${errorMessage}</p>
                     </c:if>
-                    
+
                     <%-- error: Lỗi từ AdminController (Admin) --%>
                     <c:if test="${not empty error}">
                         <p class="alert alert-danger" role="alert">${error}</p>
                     </c:if>
                 </div>
+
+
             </div>
 
             <div class="right-panel"></div>

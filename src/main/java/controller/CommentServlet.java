@@ -4,22 +4,22 @@
  */
 package controller;
 
+import DAO.CommentDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import model.Comments;
 
 /**
  *
  * @author Trien
  */
-@WebServlet(name = "LogoutServlet", urlPatterns = {"/logout"})
-public class LogoutServlet extends HttpServlet {
+@WebServlet(name = "CommentServlet", urlPatterns = {"/addComment"})
+public class CommentServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,10 +38,10 @@ public class LogoutServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet LogoutServlet</title>");
+            out.println("<title>Servlet CommentServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet LogoutServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet CommentServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -59,31 +59,7 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // 1. Hủy session
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate(); // Hủy session
-            request.setAttribute("logoutSuccess", "Bạn đã đăng xuất thành công");
-        }
-
-//        // 2. Xóa cookie
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            for (Cookie cookie : cookies) {
-//                // Xóa tất cả cookie hoặc chỉ cookie bạn muốn
-//                // Ví dụ xóa cookie tên "user" hoặc "JSESSIONID"
-//                if (cookie.getName().equals("userEmail") || cookie.getName().equals("JSESSIONID")||cookie.getName().equals("userPassword")) {
-//                    cookie.setValue("");
-//                    cookie.setPath("/");       // Path phải khớp với cookie cũ
-//                    cookie.setMaxAge(0);       // Xóa cookie
-//                    response.addCookie(cookie);
-//                }
-//            }
-//        }
-
-        // 3. Chuyển về login.jsp
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        processRequest(request, response);
     }
 
     /**
@@ -97,7 +73,24 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            request.setCharacterEncoding("UTF-8");
+            String userName = request.getParameter("userName");
+            String content = request.getParameter("content");
+            int productId = Integer.parseInt(request.getParameter("productId"));
+
+            Comments comment = new Comments();
+            comment.setFull_name(userName);
+            comment.setContent(content);
+            comment.setPro_id(productId);
+
+            CommentDAO dao = new CommentDAO();
+            dao.addComment(comment);
+
+            response.sendRedirect("productdetail?pro_id=" + productId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

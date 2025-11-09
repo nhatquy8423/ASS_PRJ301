@@ -14,11 +14,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.UUID;
 import model.Customer;
 
 /**
- * Servlet xử lý việc đăng nhập/đăng ký cho Customer.
- * URL: /auth
+ * Servlet xử lý việc đăng nhập/đăng ký cho Customer. URL: /auth
  */
 @WebServlet(name = "AuthController", urlPatterns = {"/auth"})
 public class AuthController extends HttpServlet {
@@ -34,32 +34,29 @@ public class AuthController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-        // (Giữ nguyên logic xử lý cookie để tự động điền form nếu có)
+
         String savedEmail = "";
-        String savedPassword = "";
         boolean rememberChecked = false;
 
+        // Đọc cookie
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
-                if (c.getName().equals("userEmail")) {
+                if ("userEmail".equals(c.getName())) {
                     savedEmail = c.getValue();
-                }
-                if (c.getName().equals("userPassword")) {
-                    savedPassword = c.getValue();
-                    if (!savedPassword.isEmpty()) {
-                        rememberChecked = true;
+                    if (!savedEmail.isEmpty()) {
+                        rememberChecked = true; //có email → tick remember
                     }
+                    break;
                 }
             }
         }
-        
+
+        // Gửi dữ liệu sang JSP
         request.setAttribute("savedEmail", savedEmail);
-        request.setAttribute("savedPassword", savedPassword);
         request.setAttribute("rememberChecked", rememberChecked);
-        
-        // Chuyển tiếp sang login.jsp
+
+        // Chuyển tiếp đến login.jsp
         request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
@@ -87,39 +84,32 @@ public class AuthController extends HttpServlet {
 
         if (c == null) {
             // Đăng nhập thất bại
-            
+
             // (Giữ lại thông tin đã nhập để điền lại vào form)
             request.setAttribute("savedEmail", email);
-            
+
             // Đặt thông báo lỗi
             request.setAttribute("errorMessage", "Sai email hoặc mật khẩu!");
             request.getRequestDispatcher("login.jsp").forward(request, response);
 
         } else {
-            // ✅ 2. ĐĂNG NHẬP THÀNH CÔNG
+            // 2. ĐĂNG NHẬP THÀNH CÔNG
             HttpSession session = req.getSession();
             session.setAttribute("customer", c); // Lưu đối tượng Customer vào session
             session.setMaxInactiveInterval(30 * 60); // Thời gian sống session
+            session.setAttribute("loginSuccess", "Bạn đã đăng nhập thành công");
 
-            // 3. Xử lý Cookie Remember Me (giữ nguyên logic đã có)
+            // 3. Xử lý Cookie Remember Me (giữ nguyên logic đã có, chỉ lưu email)
             if ("on".equals(remember)) {
                 Cookie emailCookie = new Cookie("userEmail", email);
-                Cookie passwordCookie = new Cookie("userPassword", password);
-                emailCookie.setMaxAge(7 * 24 * 60 * 60);
-                passwordCookie.setMaxAge(7 * 24 * 60 * 60);
+                emailCookie.setMaxAge(7 * 24 * 60 * 60); // 7 ngày
                 emailCookie.setPath("/");
-                passwordCookie.setPath("/");
                 response.addCookie(emailCookie);
-                response.addCookie(passwordCookie);
             } else {
-                Cookie emailCookie = new Cookie("userEmail", email);
-                Cookie passwordCookie = new Cookie("userPassword", "");
-                emailCookie.setMaxAge(7 * 24 * 60 * 60);
-                passwordCookie.setMaxAge(0);
+                Cookie emailCookie = new Cookie("userEmail", "");
+                emailCookie.setMaxAge(0);
                 emailCookie.setPath("/");
-                passwordCookie.setPath("/");
                 response.addCookie(emailCookie);
-                response.addCookie(passwordCookie);
             }
 
             // 4. LOGIC CHUYỂN HƯỚNG TỚI targetURL (MỚI)
@@ -127,11 +117,11 @@ public class AuthController extends HttpServlet {
 
             if (targetURL != null && !targetURL.isEmpty()) {
                 // Nếu có targetURL (bị Filter chặn trước đó), chuyển hướng tới trang đích
-                session.removeAttribute("targetURL"); 
+                session.removeAttribute("targetURL");
                 response.sendRedirect(req.getContextPath() + targetURL);
             } else {
                 // Nếu không có targetURL (người dùng tự vào /auth), chuyển hướng về home.jsp
-                response.sendRedirect("home.jsp"); 
+                response.sendRedirect("product");
             }
         }
     }

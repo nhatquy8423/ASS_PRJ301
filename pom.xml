@@ -12,7 +12,7 @@
         <jakartaee>10.0.0</jakartaee>
     </properties>
     
-     <dependencies>
+    <dependencies>
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-api</artifactId>
@@ -42,13 +42,18 @@
             <version>2.0.0</version>
             <scope>runtime</scope>
         </dependency>
-          <dependency>
-               <groupId>org.sazabi</groupId>
-               <artifactId>bcrypt4z_2.11</artifactId>
-               <version>0.0.2</version>
-               <type>jar</type>
-          </dependency>
-     </dependencies>
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version> <!-- sửa từ 2.1.1 -->
+        </dependency>
+        <dependency>
+            <groupId>org.sazabi</groupId>
+            <artifactId>bcrypt4z_2.11</artifactId>
+            <version>0.0.2</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
     
     <build>
         <plugins>

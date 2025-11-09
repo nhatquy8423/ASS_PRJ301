@@ -4,22 +4,22 @@
  */
 package controller;
 
+import DAO.CustomerDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+
 
 /**
  *
  * @author Trien
  */
-@WebServlet(name = "LogoutServlet", urlPatterns = {"/logout"})
-public class LogoutServlet extends HttpServlet {
+@WebServlet(name = "ResetPasswordServlet", urlPatterns = {"/reset-password"})
+public class ResetPasswordServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,10 +38,10 @@ public class LogoutServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet LogoutServlet</title>");
+            out.println("<title>Servlet ResetPasswordServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet LogoutServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet ResetPasswordServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -59,31 +59,7 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        // 1. Hủy session
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate(); // Hủy session
-            request.setAttribute("logoutSuccess", "Bạn đã đăng xuất thành công");
-        }
-
-//        // 2. Xóa cookie
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            for (Cookie cookie : cookies) {
-//                // Xóa tất cả cookie hoặc chỉ cookie bạn muốn
-//                // Ví dụ xóa cookie tên "user" hoặc "JSESSIONID"
-//                if (cookie.getName().equals("userEmail") || cookie.getName().equals("JSESSIONID")||cookie.getName().equals("userPassword")) {
-//                    cookie.setValue("");
-//                    cookie.setPath("/");       // Path phải khớp với cookie cũ
-//                    cookie.setMaxAge(0);       // Xóa cookie
-//                    response.addCookie(cookie);
-//                }
-//            }
-//        }
-
-        // 3. Chuyển về login.jsp
-        request.getRequestDispatcher("login.jsp").forward(request, response);
+        processRequest(request, response);
     }
 
     /**
@@ -95,9 +71,30 @@ public class LogoutServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        CustomerDAO dao = new CustomerDAO();
+        Integer customerId = (Integer) req.getSession().getAttribute("resetCustomerId");
+        if (customerId == null) {
+            resp.sendRedirect(req.getContextPath() + "/forgot-password.jsp");
+            return;
+        }
+
+        String password = req.getParameter("password");
+        String confirm = req.getParameter("confirm");
+
+        if (!password.equals(confirm)) {
+            req.setAttribute("message", "Mật khẩu không khớp.");
+            req.getRequestDispatcher("/reset-password.jsp").forward(req, resp);
+            return;
+        }
+
+        String hashedPassword =dao.hashMD5(password);
+        
+        dao.resetPassword(customerId, hashedPassword);
+
+        req.getSession().removeAttribute("resetCustomerId");
+        req.setAttribute("message", "Đổi mật khẩu thành công. Đăng nhập lại.");
+        req.getRequestDispatcher("/login.jsp").forward(req, resp);
     }
 
     /**

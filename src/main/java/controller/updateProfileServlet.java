@@ -4,22 +4,23 @@
  */
 package controller;
 
+import DAO.CustomerDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Customer;
 
 /**
  *
  * @author Trien
  */
-@WebServlet(name = "LogoutServlet", urlPatterns = {"/logout"})
-public class LogoutServlet extends HttpServlet {
+@WebServlet(name = "updateProfileServlet", urlPatterns = {"/update-profile"})
+public class updateProfileServlet extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,10 +39,10 @@ public class LogoutServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet LogoutServlet</title>");
+            out.println("<title>Servlet updateProfileServlet</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet LogoutServlet at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet updateProfileServlet at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -60,30 +61,8 @@ public class LogoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Hủy session
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate(); // Hủy session
-            request.setAttribute("logoutSuccess", "Bạn đã đăng xuất thành công");
-        }
+        request.getRequestDispatcher("profile.jsp").forward(request, response);
 
-//        // 2. Xóa cookie
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            for (Cookie cookie : cookies) {
-//                // Xóa tất cả cookie hoặc chỉ cookie bạn muốn
-//                // Ví dụ xóa cookie tên "user" hoặc "JSESSIONID"
-//                if (cookie.getName().equals("userEmail") || cookie.getName().equals("JSESSIONID")||cookie.getName().equals("userPassword")) {
-//                    cookie.setValue("");
-//                    cookie.setPath("/");       // Path phải khớp với cookie cũ
-//                    cookie.setMaxAge(0);       // Xóa cookie
-//                    response.addCookie(cookie);
-//                }
-//            }
-//        }
-
-        // 3. Chuyển về login.jsp
-        request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
     /**
@@ -97,7 +76,27 @@ public class LogoutServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        String name = request.getParameter("fullname");
+        String address = request.getParameter("address");
+        String numberPhone = request.getParameter("phone");
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        HttpSession session = request.getSession();
+        Customer currentUser = (Customer) session.getAttribute("customer");
+
+        CustomerDAO dao = new CustomerDAO();
+        Boolean res = dao.updateProfile(name, address, numberPhone, id);
+
+        if (res) {
+
+            currentUser.setFullname(name);
+            currentUser.setAddress(address);
+            currentUser.setPhone(numberPhone);
+            session.setAttribute("customer", currentUser);
+        }
+
+        response.sendRedirect("product");
     }
 
     /**

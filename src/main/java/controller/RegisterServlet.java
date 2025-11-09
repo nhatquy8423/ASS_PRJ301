@@ -80,12 +80,15 @@ public class RegisterServlet extends HttpServlet {
         String email = request.getParameter("email");
         String numberPhone = request.getParameter("numberPhone");
         String password = request.getParameter("password");
+       
         String confirmPassword = request.getParameter("confirmPassword");
         String address = request.getParameter("address");
 
         Customer checkEmail = dao.checkEmailExists(email);
         Customer checkPhone = dao.checkPhoneExists(numberPhone);
 
+        
+       
         if (checkEmail != null) {
             request.setAttribute("errorDuplicateEmail", "Email này đã tồn tại");
             request.getRequestDispatcher("register.jsp").forward(request, response);
@@ -106,7 +109,8 @@ public class RegisterServlet extends HttpServlet {
         Boolean success = dao.createCustomer(name, email, password, numberPhone, address);
         
         if(success == true){
-            response.sendRedirect("login.jsp");
+            request.setAttribute("successRegister","Bạn đã tạo tài khoản thành công");
+            request.getRequestDispatcher("login.jsp").forward(request,response);
         }
         else{
             request.setAttribute("errorMessage", "Vui lòng nhập lại thông tin đăng ký");
